@@ -1,6 +1,6 @@
 # DSAA6000D Final Project
 
-**Han Linghu**
+**Hands**
 
 ## Introduction
 
@@ -24,7 +24,7 @@ Due to GitHub storage limitation, only DAG3k and its random query set is provide
 
 ### How to run the sample
 
-After compiling, run the following command under 2hop directory,
+After compiling, run the following command under cloned directory,
 
 ```bash
 ./2hop -g ./graphs/DAG3kDense.in -q ./query/DAG3kDense_random.in 
