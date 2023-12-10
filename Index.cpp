@@ -1,9 +1,4 @@
-//--------------------------------------------------------------------------------------------------
-// 2-hop based on tol
-//--------------------------------------------------------------------------------------------------
 #include "Index.h"
-// #include "omp.h"
-//--------------------------------------------------------------------------------------------------
 #include <assert.h>
 #include <iostream>
 #include <algorithm>
@@ -26,8 +21,8 @@ Index::Index(Graph* g_, unsigned rt){
   //level approximation.
   levelNodes = std::vector<std::vector<unsigned> >(n_);
   level = std::vector<unsigned>(n_,0);
-  inscores = std::vector<int>(n_,0);
-  outscores = std::vector<int>(n_,0);
+  inscores = std::vector<double>(n_,0.00);
+  outscores = std::vector<double>(n_,0.00);
   approximated_scores = std::vector<int>(n_,0);
   // calculated_order 
 
@@ -88,18 +83,18 @@ unsigned Index::levelFilter(unsigned node){
 
 void Index::out_score(){
   // std::vector<unsigned>* deg = g->get_indegrees();
-  for (unsigned i = 0; i<=level[root]; ++i){
+  for (unsigned i = 1; i<=level[root]; ++i){
     std::vector<unsigned> levelset = levelNodes[i];
     if (i==1){//set to 0
       for (std::vector<unsigned>::iterator it=levelset.begin(); it!=levelset.end(); ++it){
-        outscores[*it] = 0;
+        outscores[*it] = 0.00;
       }
     }
     else{
       for (std::vector<unsigned>::iterator it=levelset.begin(); it!=levelset.end(); ++it){
         const std::vector<unsigned> *nb = g->get_neighbors(*it); 
         for (std::vector<unsigned>::const_iterator it2=nb->begin(); it2!=nb->end();++it2){
-          outscores[*it] = outscores[*it] + outscores[*it2] + 1;
+          outscores[*it] = outscores[*it] + outscores[*it2] + 1.00;
           // outscores[*it] = outscores[*it] + (outscores[*it2] + 1)/(*deg)[*it2];
         }
       }
@@ -113,14 +108,14 @@ void Index::in_score(){
     std::vector<unsigned> levelset = levelNodes[i];
     if (i==level[root]){//set to 0
       for (std::vector<unsigned>::iterator it=levelset.begin(); it!=levelset.end(); ++it){
-        inscores[*it] = 0;
+        inscores[*it] = 0.00;
       }
     }
     else{
       for (std::vector<unsigned>::iterator it=levelset.begin(); it!=levelset.end(); ++it){
         const std::vector<unsigned> *pd = g->get_predecessors(*it); 
         for (std::vector<unsigned>::const_iterator it2=pd->begin(); it2!=pd->end();++it2){
-          inscores[*it] = inscores[*it] + inscores[*it2] + 1;
+          inscores[*it] = inscores[*it] + inscores[*it2] + 1.00;
           // inscores[*it] = inscores[*it] + (inscores[*it2] + 1)/(*deg)[*it2];
         }
       }
@@ -128,21 +123,36 @@ void Index::in_score(){
   }
 }
 
+void Index::clear_dummy(){
+  const std::vector<unsigned> *nb = g->get_neighbors(root); 
+  for (std::vector<unsigned>::const_iterator it=nb->begin(); it!=nb->end();++it){
+    if (outscores[*it] > 0) inscores[*it] = 0.0;
+    
+  }
+}
+
 void Index::calculate_order(){
   for (unsigned i=0; i<n_; ++i){
-    int temp1 = inscores[i] * outscores[i] + inscores[i] + outscores[i];
+    // int temp1 = inscores[i] * outscores[i] + inscores[i] + outscores[i];
+    // double temp_score = inscores[i] / (inscores[i] + outscores[i]) * outscores[i]/(inscores[i] + outscores[i]) + 1.00;
+    double temp_score = inscores[i]* outscores[i] / (inscores[i] + outscores[i]) + 1.00;
+    // double temp_score = (inscores[i] + outscores[i]);
+    // std::cout<< temp_score << std::endl;
+    if (temp_score < 0) std::cout<< "OVERFLOW" << std::endl;
+    queue_unit temp(i, temp_score);
+    pq_node_score.push(temp);
 
-    if (temp1 > 0) {//if not overflow
-      double temp_score = (double)temp1/(double)(inscores[i] + outscores[i]);
-      queue_unit temp(i, temp_score);
-      pq_node_score.push(temp);
-    }
-    else {
-      double temp_score = (double)(2147483647)/(double)(inscores[i] + outscores[i]);
-      queue_unit temp(i, temp_score);
-      pq_node_score.push(temp);
-      std::cout << i << " node OVERFLOW!!!!!\n";
-    }
+    // if (temp1 > 0) {//if not overflow
+    //   double temp_score = (double)temp1/(double)(inscores[i] + outscores[i]);
+    //   queue_unit temp(i, temp_score);
+    //   pq_node_score.push(temp);
+    // }
+    // else {
+    //   double temp_score = (double)(2147483647)/(double)(inscores[i] + outscores[i]);
+    //   queue_unit temp(i, temp_score);
+    //   pq_node_score.push(temp);
+    //   std::cout << i << " node OVERFLOW!!!!!\n";
+    // }
     
   }
 
@@ -296,7 +306,7 @@ void Index::storage(){
     outs = outs + OUT[i].size();
   }
   //totalsize = totalsize + n_ * 4;//level order should be ignored since we add a dummy root
-  std::cout<< "index size (MB): " << totalsize << std::endl;
+  // std::cout<< "index size (MB): " << totalsize << std::endl;
   std::cout<< "ins: " << ins << std::endl;
   std::cout<< "outs: " << outs << std::endl;
 }
@@ -307,7 +317,10 @@ double Index::get_debugtime(){
 
 void Index::express(){
   for (unsigned i=0; i<n_; ++i){
-    std::cout<< i << ": level is " << level[i] << "; outscore: " << outscores[i] << "; inscore: " << inscores[i] << std::endl;
+    std::cout << calculated_order[i] << std::endl;
+    unsigned j = calculated_order[i];
+    std::cout<< j << ": level is " << level[j] << "; outscore: " << outscores[j] << "; inscore: " << inscores[j] << std::endl;
+    
   }
 }
 

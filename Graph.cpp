@@ -1,10 +1,3 @@
-/**
- * PI indexing input process: Following the procedure of FARRARI
- * @file Graph.cpp
- * @author Stephan Seufert. Modified by Han.
- * @date 2012/10/31. Update on 2023/09/25
- */
-//--------------------------------------------------------------------------------------------------
 #include "Graph.h"
 #include <assert.h>
 #include <fstream>

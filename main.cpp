@@ -1,4 +1,4 @@
-// 2hop reproduce.
+// 2hop reproduce. Implemented by Han Linghu.
 #include "Graph.h"
 #include "Timer.h"
 #include "Index.h"
@@ -56,7 +56,6 @@ int main(int argc, char *argv[]) {
 
   //init Index 
   unsigned rt = g_->num_nodes()-1;//can be 0 in the test files.
-  // unsigned rt = 0;//can be 0 in the test files.
   Index id(g_,rt);
   std::cout << "Init over ... root is: " << rt << std::endl;
 
@@ -65,8 +64,9 @@ int main(int argc, char *argv[]) {
   id.levelFilter(rt);
   id.in_score();
   id.out_score();
-  // id.express();
+  // id.clear_dummy();
   id.calculate_order();
+  // id.express();
   std::cout << "Order design over ..." << std::endl;
   double orderdesign = t2.stop();
   id.tol_2hop();
@@ -75,38 +75,36 @@ int main(int argc, char *argv[]) {
   // id.express();
   id.storage();
 
-  double positiveSearchTime = 0.0;
-  double negativeSearchTime = 0.0;
+  // double positiveSearchTime = 0.0;
+  // double negativeSearchTime = 0.0;
   unsigned reachable = 0;//total # of reachabile sets, onle effective for reachability query
   // //reachability single test
   // Timer t; t.start(); //1334 2691
   // bool answer = id.reachability2(u,v);//single test: debug use
   // std::cout << "Reachable?: " << answer << std::endl;
   // double searchTime = t.stop();
-  // Timer t; t.start(); //1334 2691
+  Timer t; t.start(); //1334 2691
   for (unsigned i=0; i<queries.size(); ++i){
     // std::cout<< queries[i].first << " " <<queries[i].second  << " round: " << i<< std::endl;
     // completePathInProcess.clear();
-    Timer t; t.start(); //1334 2691
+    // Timer t; t.start(); //1334 2691
     bool answer = id.reachability(queries[i].first,queries[i].second);
     if (answer) {
-      positiveSearchTime = positiveSearchTime + t.stop();
+      // positiveSearchTime = positiveSearchTime + t.stop();
       ++reachable;
     }
-    else negativeSearchTime = negativeSearchTime + t.stop();
+    // else negativeSearchTime = negativeSearchTime + t.stop();
   }
-  // double reachabilityTime = t.stop(); 
+  double reachabilityTime = t.stop(); 
 
   // std::cout<< "Total Path # is: " << completePathInProcess.size() << std::endl;
   // std::cout << "debug time: (" << id.get_debugtime() << " ms)" << std::endl;
   std::cout << "order time: (" << orderdesign << " ms)" << std::endl;
   std::cout << "construction: (" << constructiontime << " ms)" << std::endl;
-  // std::cout << "Reachability time: (" << reachabilityTime << " ms)" << std::endl;
-  std::cout << "Reachability time: (" << positiveSearchTime+negativeSearchTime << " ms)" << std::endl;
-  std::cout << "positive Reachability time: (" << positiveSearchTime << " ms) negative search time (" << negativeSearchTime << " ms) and reachability answer is: " << reachable << std::endl;
+  std::cout << "Reachability time: (" << reachabilityTime << " ms) and reachability answer is: " << reachable << std::endl;;
+  // std::cout << "Reachability time: (" << positiveSearchTime+negativeSearchTime << " ms)" << std::endl;
+  // std::cout << "positive Reachability time: (" << positiveSearchTime << " ms) negative search time (" << negativeSearchTime << " ms) and reachability answer is: " << reachable << std::endl;
 
   delete g_;
-
-  // std::cout<< "fuck\n"; 
   return 0;
 }

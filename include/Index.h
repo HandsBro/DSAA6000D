@@ -1,6 +1,3 @@
-//--------------------------------------------------------------------------------------------------
-//2Hop reproduce. Code style W.R.T Farrari.
-//--------------------------------------------------------------------------------------------------
 #ifndef INDEX_H_
 #define INDEX_H_
 //--------------------------------------------------------------------------------------------------
@@ -36,8 +33,8 @@ private:
 
   std::vector<std::vector<unsigned> > levelNodes;
   std::vector<unsigned> level;
-  std::vector<int> inscores;
-  std::vector<int> outscores;
+  std::vector<double> inscores;
+  std::vector<double> outscores;
   std::vector<int> approximated_scores;
   std::vector<unsigned> calculated_order;
   std::priority_queue<queue_unit> pq_node_score;
@@ -69,6 +66,7 @@ public:
   void storage();
   bool reachability(unsigned u, unsigned v);
   double get_debugtime();
+  void clear_dummy();
 
   // accessors
   inline Graph* get_graph() const {
